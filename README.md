@@ -3,6 +3,47 @@ SPDX-License-Identifier: MIT
 Copyright and inherited upstream notices: see LICENSE.txt.
 -->
 
+# MeltySynth — updated for .NET 10 and C# 14
+
+This public fork makes the .NET 10 / C# 14 modernization and accompanying bug fixes
+available independently of upstream MeltySynth. It is maintained by **KilnGod
+(James Carpenter)** and retains the original MIT license and upstream attribution.
+The library remains dependency-free. The upstream NuGet package is a separate
+artifact; use this fork's source, project reference or locally built package to
+consume these changes.
+
+## Bugs fixed in this fork
+
+- **Zero-duration MIDI loops:** reject non-progressing loops before playback rather
+  than allowing audio rendering to hang; rejected playback preserves the current score.
+- **Short sample loops at high pitch:** correctly wrap advances across multiple loop
+  lengths and validate sample/loop ranges, preventing out-of-range sample access.
+- **Incomplete SoundFont reads:** handle short stream reads and reject truncated,
+  misaligned or conflicting sample chunks instead of accepting incomplete samples.
+- **Malformed or oversized assets:** enforce configurable loading budgets and RIFF,
+  SoundFont and MIDI track boundaries; validate event/timing metadata and end-of-track
+  padding before accepting an asset.
+- **Unsafe tuning and MIDI controls:** reject invalid SoundFont generator values,
+  unrepresentable pitch and invalid live MIDI data before they can corrupt playback
+  state or cause rendering exceptions. Validate volume and sequencer speed as well.
+- **Sequencer callback reentrancy:** explicitly reject unsafe Play/Stop/nested Render
+  calls during rendering, preserve supported MIDI forwarding and hook changes, and
+  recover cleanly from callback exceptions.
+- **Long-running timing drift:** preserve fractional sample-clock time at 44.1 and
+  48 kHz, including speed changes, pauses, resets and loop boundaries.
+- **Externally mutable prepared assets:** prevent callers from modifying SoundFont,
+  instrument and preset backing collections through public read-only views, without
+  adding per-note copies.
+- **C# 14 span compatibility:** make writable spans explicit where new overload
+  resolution otherwise selected read-only spans and prevented source compilation.
+
+The fork also includes portable regression fixtures, configurable sample paths,
+asset preflight tools, and trimming/macOS ARM64 NativeAOT validation. See the
+[change log](CHANGELOG.md) and [modernization closeout](docs/ModernizationCloseout.md)
+for details, validation scope and remaining platform checks.
+
+---
+
 # MeltySynth
 
 MeltySynth is a SoundFont synthesizer written in C#.
